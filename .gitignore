@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# pdfjs-dist assets (copied from node_modules)
+public/cmaps
+public/standard_fonts
