@@ -54,7 +54,7 @@ export const ChatMessages = React.forwardRef<HTMLDivElement, ChatMessagesProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'flex-1 flex flex-col overflow-auto py-2 my-4 gap-4',
+                    'flex-1 flex flex-col overflow-auto py-2 mb-4 gap-4',
                     className
                 )}
                 {...props}

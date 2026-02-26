@@ -1,4 +1,3 @@
-import { LogoutBtn } from '@/features/auth/components/logout-btn'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { getUserDisplayName } from '@/features/auth/utils/get-user-display-name'
 import { SendIcon } from 'lucide-react'
@@ -22,11 +21,12 @@ import {
 } from '../chat/chat-toolbar'
 import { AuthJoinChatForm } from './components/auth-join-chat-form'
 import { useLiveChat } from './hooks/use-live-chat'
+import { ChatMetadata } from './components/chat-metadata'
 
 function ChatInner() {
     const { user, loading: isUserLoading } = useAuth()
 
-    const { onlineUsers, messages, sendMessage } = useLiveChat(user)
+    const { messages, sendMessage } = useLiveChat(user)
 
     const [message, setMessage] = useState('')
     const isValidMessage = message.trim().length > 0
@@ -56,35 +56,38 @@ function ChatInner() {
     }
 
     return (
-        <div className="flex flex-col justify-between gap-2 w-full">
-            <div className="flex flex-col items-start gap-2">
-                <p>Joined chat as {getUserDisplayName(user)}</p>
-                <p>Online users: {onlineUsers.length}</p>
-                <LogoutBtn />
-            </div>
+        <div className="flex flex-col w-full gap-4">
+            <ChatMetadata />
 
             <Chat className="flex-1 w-full h-full">
                 <ChatMessages ref={messagesContainerRef}>
-                    {messages.map(({ id, name, text, timestamp }) => (
-                        <ChatEvent key={id}>
-                            <ChatEventAddon>
-                                <ChatEventAvatar
-                                    fallback={getUserDisplayName(user)[0]}
-                                />
-                            </ChatEventAddon>
-                            <ChatEventBody>
-                                <div className="flex gap-2 items-center w-full">
-                                    <ChatEventTitle>
-                                        <span className="font-semibold">
-                                            {name}
-                                        </span>
-                                    </ChatEventTitle>
-                                    <ChatEventTime timestamp={timestamp} />
-                                </div>
-                                <ChatEventContent>{text}</ChatEventContent>
-                            </ChatEventBody>
-                        </ChatEvent>
-                    ))}
+                    {messages.length > 0 ? (
+                        messages.map(({ id, name, text, timestamp }) => (
+                            <ChatEvent key={id}>
+                                <ChatEventAddon>
+                                    <ChatEventAvatar
+                                        fallback={getUserDisplayName(user)[0]}
+                                    />
+                                </ChatEventAddon>
+                                <ChatEventBody>
+                                    <div className="flex gap-2 items-center w-full">
+                                        <ChatEventTitle>
+                                            <span className="font-semibold">
+                                                {name}
+                                            </span>
+                                        </ChatEventTitle>
+                                        <ChatEventTime timestamp={timestamp} />
+                                    </div>
+                                    <ChatEventContent>{text}</ChatEventContent>
+                                </ChatEventBody>
+                            </ChatEvent>
+                        ))
+                    ) : (
+                        <p className="text-muted-foreground text-center">
+                            No messages yet.
+                            <br /> Be the first to start the conversation!
+                        </p>
+                    )}
                 </ChatMessages>
                 <ChatToolbar>
                     {/* We wrap the textarea into form so that we can submit the form
@@ -94,6 +97,7 @@ function ChatInner() {
                         onSubmit={handleSubmitMessage}
                     >
                         <ChatToolbarTextarea
+                            autoFocus
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             // Textarea inserts new line on Enter by default, but we want to submit the form instead.
