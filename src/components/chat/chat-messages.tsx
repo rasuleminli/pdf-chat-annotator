@@ -13,6 +13,7 @@
  */
 
 import { cn } from '@/lib/utils'
+import React from 'react'
 
 export interface ChatMessagesProps extends React.ComponentProps<'div'> {
     children?: React.ReactNode
@@ -47,20 +48,19 @@ export interface ChatMessagesProps extends React.ComponentProps<'div'> {
  * </ChatMessages>
  * ```
  */
-export function ChatMessages({
-    children,
-    className,
-    ...props
-}: ChatMessagesProps) {
-    return (
-        <div
-            className={cn(
-                'flex-1 flex flex-col-reverse overflow-auto pt-3 pb-8 gap-4',
-                className
-            )}
-            {...props}
-        >
-            {children}
-        </div>
-    )
-}
+export const ChatMessages = React.forwardRef<HTMLDivElement, ChatMessagesProps>(
+    function ChatMessages({ children, className, ...props }, ref) {
+        return (
+            <div
+                ref={ref}
+                className={cn(
+                    'flex-1 flex flex-col overflow-auto py-2 my-4 gap-4',
+                    className
+                )}
+                {...props}
+            >
+                {children}
+            </div>
+        )
+    }
+)

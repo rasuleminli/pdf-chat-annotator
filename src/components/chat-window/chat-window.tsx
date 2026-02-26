@@ -2,7 +2,7 @@ import { LogoutBtn } from '@/features/auth/components/logout-btn'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { getUserDisplayName } from '@/features/auth/utils/get-user-display-name'
 import { SendIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Chat } from '../chat/chat'
 import {
     ChatEvent,
@@ -31,6 +31,22 @@ function ChatInner() {
     const [message, setMessage] = useState('')
     const isValidMessage = message.trim().length > 0
 
+    // Scroll to bottom of the chat messages without affecting document.body.
+    // scrollIntoView() bubbles through all scrollable parents (including body),
+    // so we scroll the container element directly instead.
+    const messagesContainerRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        const el = messagesContainerRef.current
+        if (el) el.scrollTop = el.scrollHeight
+    }, [messages])
+
+    const handleSubmitMessage = (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (!isValidMessage) return
+        sendMessage(message)
+        setMessage('')
+    }
+
     if (isUserLoading) {
         return 'Loading...'
     }
@@ -40,12 +56,15 @@ function ChatInner() {
     }
 
     return (
-        <div className="flex flex-col items-start gap-2 w-full">
-            <p>Joined chat as {getUserDisplayName(user)}</p>
-            <p>Online users: {onlineUsers.length}</p>
-            <LogoutBtn />
-            <Chat className="flex-1 w-full">
-                <ChatMessages>
+        <div className="flex flex-col justify-between gap-2 w-full">
+            <div className="flex flex-col items-start gap-2">
+                <p>Joined chat as {getUserDisplayName(user)}</p>
+                <p>Online users: {onlineUsers.length}</p>
+                <LogoutBtn />
+            </div>
+
+            <Chat className="flex-1 w-full h-full">
+                <ChatMessages ref={messagesContainerRef}>
                     {messages.map(({ id, name, text, timestamp }) => (
                         <ChatEvent key={id}>
                             <ChatEventAddon>
@@ -72,12 +91,7 @@ function ChatInner() {
                     by clicking on the send button without repeating ourselves. */}
                     <form
                         className="w-full flex flex-row-reverse items-center justify-between"
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            if (!isValidMessage) return
-                            sendMessage(message)
-                            setMessage('')
-                        }}
+                        onSubmit={handleSubmitMessage}
                     >
                         <ChatToolbarTextarea
                             value={message}
@@ -108,7 +122,7 @@ function ChatInner() {
 
 export function ChatWindow() {
     return (
-        <div className="border rounded-md overflow-hidden flex p-4">
+        <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px]">
             <ChatInner />
         </div>
     )
