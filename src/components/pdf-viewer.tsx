@@ -22,14 +22,7 @@ export function PdfViewer() {
 
     return (
         <div>
-            <Document
-                file={file}
-                onLoadSuccess={onDocumentLoadSuccess}
-                options={{
-                    cMapUrl: '/cmaps/',
-                    standardFontDataUrl: '/standard_fonts/',
-                }}
-            >
+            <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page pageNumber={pageNumber} />
             </Document>
             <p>
