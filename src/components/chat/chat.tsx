@@ -10,7 +10,8 @@ export function Chat() {
     const { user, loading: isUserLoading } = useAuth()
 
     const [name, setName] = useState('')
-    const isNameValid = name.trim().length > 0 && name.trim().length <= 30
+    const isNameTooLong = name.trim().length > 30
+    const isNameValid = name.trim().length > 0 && !isNameTooLong
 
     /**
      * Join chat functionality
@@ -59,12 +60,14 @@ export function Chat() {
                                 value={name}
                                 onChange={(e) => {
                                     if (isJoining) return
+                                    setJoinError(null)
                                     setName(e.target.value)
                                 }}
                                 placeholder="Your name"
                                 className="h-14 text-lg!"
                                 disabled={isJoining}
                             />
+
                             <Button
                                 type="submit"
                                 disabled={!isNameValid || isJoining}
@@ -86,6 +89,11 @@ export function Chat() {
                             <p className="text-sm self-start flex gap-2 items-center mt-2">
                                 <AlertCircleIcon className="size-4" />
                                 {joinError}
+                            </p>
+                        )}
+                        {isNameTooLong && (
+                            <p className="text-sm self-start mt-2">
+                                Woah, this name is too long!
                             </p>
                         )}
                     </div>
