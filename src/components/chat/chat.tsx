@@ -1,10 +1,17 @@
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { AlertCircleIcon, Loader2Icon } from 'lucide-react'
 import { LogoutBtn } from '@/features/auth/components/logout-btn'
+import type { User } from '@supabase/supabase-js'
+
+const getUserDisplayName = (user: User) => {
+    return typeof user.user_metadata?.display_name === 'string'
+        ? user.user_metadata.display_name
+        : 'Guest'
+}
 
 export function Chat() {
     const { user, loading: isUserLoading } = useAuth()
@@ -39,6 +46,60 @@ export function Chat() {
         console.log(data)
     }
 
+    /**
+     * Presence Channel
+     * https://supabase.com/docs/guides/realtime/presence
+     */
+    const [onlineUsers, setOnlineUsers] = useState<
+        { id: string; name: string }[]
+    >([])
+
+    useEffect(() => {
+        if (!user) return
+
+        const channel = supabase.channel('pdf_room', {
+            config: {
+                presence: {
+                    // The key that helps us identify the user in the presence state
+                    key: user.id,
+                },
+            },
+        })
+
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                const newState = channel.presenceState()
+                const uniqueUsers = Object.entries(newState).map(
+                    ([id, presences]) => {
+                        // 'presences' is an array of sessions for this specific ID
+                        // We take the metadata from the first active session
+                        const p = presences[0] as {
+                            name: string
+                            presence_ref: string
+                        }
+                        return {
+                            id: id,
+                            name: p.name || 'Anonymous',
+                        }
+                    }
+                )
+                setOnlineUsers(uniqueUsers)
+            })
+            // For our goal of just listing online users, we don't need to listen to join and leave events,
+            // because the sync event already acts as the single source of truth for the current online users.
+            // .on('presence', { event: 'join' }, ({ key, newPresences }) => {})
+            // .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {})
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.track({ name: getUserDisplayName(user) })
+                }
+            })
+
+        return () => {
+            channel.unsubscribe()
+        }
+    }, [user])
+
     if (isUserLoading) {
         return <ChatWrapper>Loading...</ChatWrapper>
     }
@@ -71,7 +132,7 @@ export function Chat() {
                             <Button
                                 type="submit"
                                 disabled={!isNameValid || isJoining}
-                                className="h-14 text-lg! cursor-pointer transition-none"
+                                className="h-14 text-lg! transition-none"
                             >
                                 {isJoining ? (
                                     <>
@@ -104,14 +165,19 @@ export function Chat() {
 
     return (
         <ChatWrapper>
-            Joined chat as {user.user_metadata?.display_name || 'John Doe'}
-            <LogoutBtn />
+            <div className="flex flex-col items-start gap-2">
+                <p>Joined chat as {getUserDisplayName(user)}</p>
+                <p>Online users: {onlineUsers.length}</p>
+                <LogoutBtn />
+            </div>
         </ChatWrapper>
     )
 }
 
 function ChatWrapper({ children }: { children: React.ReactNode }) {
     return (
-        <div className="border rounded-md overflow-hidden flex">{children}</div>
+        <div className="border rounded-md overflow-hidden flex p-4">
+            {children}
+        </div>
     )
 }
