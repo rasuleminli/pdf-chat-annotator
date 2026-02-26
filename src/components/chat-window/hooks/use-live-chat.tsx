@@ -11,7 +11,7 @@ type Message = {
     timestamp: number
 }
 
-const CHANNEL_NAME = 'pdf_room'
+const CHANNEL_NAME = 'pdf_collab_channel'
 const CHAT_MESSAGE_EVENT = 'chat_msg'
 
 /**

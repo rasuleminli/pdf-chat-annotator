@@ -123,7 +123,7 @@ function ChatInner() {
 
 export function ChatWindow() {
     return (
-        <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px]">
+        <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px] relative">
             <ChatInner />
         </div>
     )
