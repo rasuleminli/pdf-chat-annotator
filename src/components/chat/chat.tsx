@@ -1,35 +1,59 @@
-import { LogoutBtn } from '@/features/auth/components/logout-btn'
-import { useAuth } from '@/features/auth/hooks/use-auth'
-import { getUserDisplayName } from '@/features/auth/utils/get-user-display-name'
-import { AuthJoinChatForm } from './components/auth-join-chat-form'
-import { useLiveChat } from './hooks/use-live-chat'
+/**
+ * @module chat
+ *
+ * Root container for the chat UI. Provides a flex column layout with
+ * container query support (`@container/chat`) so child components can
+ * adapt to the available width.
+ *
+ * **Important:** Give `Chat` or its parent a defined height or max-height (e.g. via
+ * `className="h-screen"`) to enable proper scrolling in `ChatMessages`.
+ *
+ * @see {@link ChatHeader} for the sticky top header.
+ * @see {@link ChatMessages} for the scrollable message area.
+ * @see {@link ChatToolbar} for the sticky bottom input area.
+ */
 
-function ChatInner() {
-    const { user, loading: isUserLoading } = useAuth()
+import { cn } from '@/lib/utils'
 
-    const { onlineUsers } = useLiveChat(user)
-
-    if (isUserLoading) {
-        return 'Loading...'
-    }
-
-    if (!user) {
-        return <AuthJoinChatForm />
-    }
-
-    return (
-        <div className="flex flex-col items-start gap-2">
-            <p>Joined chat as {getUserDisplayName(user)}</p>
-            <p>Online users: {onlineUsers.length}</p>
-            <LogoutBtn />
-        </div>
-    )
+export interface ChatProps extends React.ComponentProps<'div'> {
+    children?: React.ReactNode
 }
 
-export function Chat() {
+/**
+ * Root container component that establishes the chat layout structure
+ * with container queries and flex column layout for header, messages,
+ * and toolbar sections.
+ *
+ * Uses container queries (e.g. `@md/chat:`, `@2xl/chat:`) to adapt
+ * layout based on available width rather than viewport size.
+ *
+ * @example
+ * ```tsx
+ * <Chat className="h-screen">
+ *   <ChatHeader>
+ *     Header Content
+ *   </ChatHeader>
+ *
+ *   <ChatMessages>
+ *     Messages Content
+ *   </ChatMessages>
+ *
+ *   <ChatToolbar>
+ *     Toolbar Content
+ *   </ChatToolbar>
+ * </Chat>
+ * ```
+ */
+export function Chat({ children, className, ...props }: ChatProps) {
     return (
-        <div className="border rounded-md overflow-hidden flex p-4">
-            <ChatInner />
+        <div
+            className={cn(
+                'h-full overflow-hidden flex flex-col @container/chat',
+                className
+            )}
+            {...props}
+        >
+            {children}
         </div>
     )
 }
