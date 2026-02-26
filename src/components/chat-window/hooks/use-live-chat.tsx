@@ -6,12 +6,12 @@ import { useEffect, useState } from 'react'
 type OnlineUser = { id: string; name: string }
 type Message = {
     id: string
-    name: string
+    user: { name: string; id: string }
     text: string
     timestamp: number
 }
 
-const CHANNEL_NAME = 'pdf_collab_channel'
+const CHANNEL_NAME = 'chat_room'
 const CHAT_MESSAGE_EVENT = 'chat_msg'
 
 /**
@@ -76,7 +76,7 @@ export function useLiveChat(user: User | null) {
 
         const message: Message = {
             id: crypto.randomUUID(),
-            name: getUserDisplayName(user),
+            user: { name: getUserDisplayName(user), id: user.id },
             text: content,
             timestamp: Date.now(),
         }

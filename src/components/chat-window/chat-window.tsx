@@ -21,6 +21,7 @@ import {
 import { AuthJoinChatForm } from './components/auth-join-chat-form'
 import { useLiveChat } from './hooks/use-live-chat'
 import { ChatMetadata } from './components/chat-metadata'
+import { cn } from '@/lib/utils'
 
 function ChatInner() {
     const { user, loading: isUserLoading } = useAuth()
@@ -61,24 +62,41 @@ function ChatInner() {
             <Chat className="flex-1 w-full h-full">
                 <ChatMessages ref={messagesContainerRef}>
                     {messages.length > 0 ? (
-                        messages.map(({ id, name, text, timestamp }) => (
-                            <ChatEvent key={id}>
-                                <ChatEventAddon>
-                                    <ChatEventAvatar fallback={name[0]} />
-                                </ChatEventAddon>
-                                <ChatEventBody>
-                                    <div className="flex gap-2 items-center w-full">
-                                        <ChatEventTitle>
-                                            <span className="font-semibold">
-                                                {name}
-                                            </span>
-                                        </ChatEventTitle>
-                                        <ChatEventTime timestamp={timestamp} />
-                                    </div>
-                                    <ChatEventContent>{text}</ChatEventContent>
-                                </ChatEventBody>
-                            </ChatEvent>
-                        ))
+                        messages.map(
+                            ({ id, user: sender, text, timestamp }) => (
+                                <ChatEvent key={id}>
+                                    <ChatEventAddon>
+                                        <ChatEventAvatar
+                                            fallback={sender.name[0]}
+                                        />
+                                    </ChatEventAddon>
+                                    <ChatEventBody>
+                                        <div className="flex gap-2 items-center w-full">
+                                            <ChatEventTitle>
+                                                <span
+                                                    className={cn(
+                                                        'font-semibold',
+                                                        sender.id ===
+                                                            user?.id &&
+                                                            'text-muted-foreground'
+                                                    )}
+                                                >
+                                                    {sender.id === user?.id
+                                                        ? 'You'
+                                                        : sender.name}
+                                                </span>
+                                            </ChatEventTitle>
+                                            <ChatEventTime
+                                                timestamp={timestamp}
+                                            />
+                                        </div>
+                                        <ChatEventContent>
+                                            {text}
+                                        </ChatEventContent>
+                                    </ChatEventBody>
+                                </ChatEvent>
+                            )
+                        )
                     ) : (
                         <p className="text-muted-foreground text-center">
                             No messages yet.
