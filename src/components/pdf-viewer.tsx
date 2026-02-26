@@ -21,7 +21,7 @@ export function PdfViewer() {
     }
 
     return (
-        <div>
+        <div className="border rounded-md overflow-hidden">
             <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page pageNumber={pageNumber} />
             </Document>
