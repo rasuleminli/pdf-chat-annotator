@@ -1,5 +1,4 @@
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import { getUserDisplayName } from '@/features/auth/utils/get-user-display-name'
 import { SendIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Chat } from '../chat/chat'
@@ -65,9 +64,7 @@ function ChatInner() {
                         messages.map(({ id, name, text, timestamp }) => (
                             <ChatEvent key={id}>
                                 <ChatEventAddon>
-                                    <ChatEventAvatar
-                                        fallback={getUserDisplayName(user)[0]}
-                                    />
+                                    <ChatEventAvatar fallback={name[0]} />
                                 </ChatEventAddon>
                                 <ChatEventBody>
                                     <div className="flex gap-2 items-center w-full">

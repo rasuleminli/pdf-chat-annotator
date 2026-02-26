@@ -75,7 +75,7 @@ export function useLiveChat(user: User | null) {
         if (!user) return
 
         const message: Message = {
-            id: Math.random().toString(36),
+            id: crypto.randomUUID(),
             name: getUserDisplayName(user),
             text: content,
             timestamp: Date.now(),
