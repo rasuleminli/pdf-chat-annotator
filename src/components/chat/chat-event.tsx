@@ -195,7 +195,10 @@ export function ChatEventBody({
     ...props
 }: ChatEventBodyProps) {
     return (
-        <div className={cn('flex-1 flex flex-col', className)} {...props}>
+        <div
+            className={cn('flex-1 flex flex-col items-start', className)}
+            {...props}
+        >
             {children}
         </div>
     )
@@ -218,7 +221,13 @@ export function ChatEventContent({
     ...props
 }: ChatEventContentProps) {
     return (
-        <div className={cn('text-sm @md/chat:text-base', className)} {...props}>
+        <div
+            className={cn(
+                'text-sm @md/chat:text-base whitespace-pre-wrap w-full text-left',
+                className
+            )}
+            {...props}
+        >
             {children}
         </div>
     )
@@ -245,7 +254,7 @@ export function ChatEventTitle({
 }: ChatEventTitleProps) {
     return (
         <div
-            className={cn('flex items-center gap-2 text-sm', className)}
+            className={cn('flex items-center gap-1 text-sm', className)}
             {...props}
         >
             {children}

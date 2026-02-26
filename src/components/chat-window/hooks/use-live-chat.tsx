@@ -4,7 +4,12 @@ import type { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 
 type OnlineUser = { id: string; name: string }
-type Message = { id: string; name: string; text: string }
+type Message = {
+    id: string
+    name: string
+    text: string
+    timestamp: number
+}
 
 const CHANNEL_NAME = 'pdf_room'
 const CHAT_MESSAGE_EVENT = 'chat_msg'
@@ -15,18 +20,26 @@ const CHAT_MESSAGE_EVENT = 'chat_msg'
  */
 export function useLiveChat(user: User | null) {
     const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: '1',
-            name: 'John Doe',
-            text: 'Hello, world!',
-        },
-        {
-            id: '2',
-            name: 'Jane Doe',
-            text: 'This is a test message.',
-        },
-    ])
+    const [messages, setMessages] = useState<Message[]>([])
+
+    // Temporarily set initial messages for testing
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setMessages([
+            {
+                id: '1',
+                name: 'John Doe',
+                text: 'Hello, world!',
+                timestamp: Date.now(),
+            },
+            {
+                id: '2',
+                name: 'Jane Doe',
+                text: 'This is a test message.',
+                timestamp: Date.now(),
+            },
+        ])
+    }, [])
 
     useEffect(() => {
         if (!user) return
@@ -84,6 +97,7 @@ export function useLiveChat(user: User | null) {
             id: Math.random().toString(36),
             name: getUserDisplayName(user),
             text: content,
+            timestamp: Date.now(),
         }
 
         // Send directly to other clients

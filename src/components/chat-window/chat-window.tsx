@@ -10,6 +10,7 @@ import {
     ChatEventAvatar,
     ChatEventBody,
     ChatEventContent,
+    ChatEventTime,
     ChatEventTitle,
 } from '../chat/chat-event'
 import { ChatMessages } from '../chat/chat-messages'
@@ -45,20 +46,23 @@ function ChatInner() {
             <LogoutBtn />
             <Chat className="flex-1 w-full">
                 <ChatMessages>
-                    {messages.map((msg) => (
-                        <ChatEvent key={msg.id}>
+                    {messages.map(({ id, name, text, timestamp }) => (
+                        <ChatEvent key={id}>
                             <ChatEventAddon>
                                 <ChatEventAvatar
                                     fallback={getUserDisplayName(user)[0]}
                                 />
                             </ChatEventAddon>
                             <ChatEventBody>
-                                <ChatEventTitle>
-                                    <span className="font-medium">
-                                        {msg.name}
-                                    </span>
-                                </ChatEventTitle>
-                                <ChatEventContent>{msg.text}</ChatEventContent>
+                                <div className="flex gap-2 items-center w-full">
+                                    <ChatEventTitle>
+                                        <span className="font-semibold">
+                                            {name}
+                                        </span>
+                                    </ChatEventTitle>
+                                    <ChatEventTime timestamp={timestamp} />
+                                </div>
+                                <ChatEventContent>{text}</ChatEventContent>
                             </ChatEventBody>
                         </ChatEvent>
                     ))}

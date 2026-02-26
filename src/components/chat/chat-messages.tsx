@@ -55,7 +55,7 @@ export function ChatMessages({
     return (
         <div
             className={cn(
-                'flex-1 flex flex-col-reverse overflow-auto py-2',
+                'flex-1 flex flex-col-reverse overflow-auto pt-3 pb-8 gap-4',
                 className
             )}
             {...props}
