@@ -1,5 +1,5 @@
 import { ChatWindow } from './components/chat-window'
-import { RealtimeCursors } from './components/realtime-cursors'
+import { RealtimeCursors } from './features/realtime-cursors/components/realtime-cursors'
 import { useAuth } from './features/auth/hooks/use-auth'
 import { PdfViewer } from './components/pdf-viewer'
 import { getUserDisplayName } from './features/auth/utils/get-user-display-name'

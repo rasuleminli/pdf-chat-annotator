@@ -1,7 +1,5 @@
 import { Cursor } from '@/components/cursor'
-import { useRealtimeCursors } from '@/hooks/use-realtime-cursors'
-
-const THROTTLE_MS = 50
+import { useRealtimeCollaboration } from '../hooks/use-realtime-cursors'
 
 export const RealtimeCursors = ({
     roomName,
@@ -10,10 +8,9 @@ export const RealtimeCursors = ({
     roomName: string
     username: string
 }) => {
-    const { cursors, selections } = useRealtimeCursors({
+    const { cursors, selections } = useRealtimeCollaboration({
         roomName,
         username,
-        throttleMs: THROTTLE_MS,
     })
 
     return (
