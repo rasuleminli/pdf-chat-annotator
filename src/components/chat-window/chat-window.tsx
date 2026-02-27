@@ -1,7 +1,7 @@
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { SendIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Chat } from '../chat/chat'
+import { Chat } from './chat/chat'
 import {
     ChatEvent,
     ChatEventAddon,
@@ -10,14 +10,14 @@ import {
     ChatEventContent,
     ChatEventTime,
     ChatEventTitle,
-} from '../chat/chat-event'
-import { ChatMessages } from '../chat/chat-messages'
+} from './chat/chat-event'
+import { ChatMessages } from './chat/chat-messages'
 import {
     ChatToolbar,
     ChatToolbarAddon,
     ChatToolbarButton,
     ChatToolbarTextarea,
-} from '../chat/chat-toolbar'
+} from './chat/chat-toolbar'
 import { AuthJoinChatForm } from './components/auth-join-chat-form'
 import { useLiveChat } from './hooks/use-live-chat'
 import { ChatMetadata } from './components/chat-metadata'

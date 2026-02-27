@@ -2,13 +2,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useCallback, useEffect, useState } from 'react'
 import { EVENTS, THROTTLE_MS } from '../lib/constants'
 import { useThrottleCallback } from '../use-throttle-callback'
-
-type SelectionRect = {
-    x: number
-    y: number
-    width: number
-    height: number
-}
+import type { SelectionRect } from '../lib/types'
 
 export type SelectionPayload = {
     rects: SelectionRect[]

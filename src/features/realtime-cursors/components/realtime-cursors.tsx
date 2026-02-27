@@ -1,18 +1,19 @@
 import { Cursor } from '@/components/cursor'
-import { useRealtimeCursors } from '../hooks/use-realtime-cursors'
+import type { CursorEventPayload } from '../hooks/states/use-cursor-state'
+import type {
+    HighlightPayload,
+    SelectionPayload,
+} from '../hooks/states/use-selection-state'
 
 export const RealtimeCursors = ({
-    roomName,
-    username,
+    cursors,
+    savedHighlights,
+    selections,
 }: {
-    roomName: string
-    username: string
+    cursors: Record<string, CursorEventPayload>
+    savedHighlights: Record<string, HighlightPayload>
+    selections: Record<string, SelectionPayload>
 }) => {
-    const { cursors, savedHighlights, selections } = useRealtimeCursors({
-        roomName,
-        username,
-    })
-
     return (
         <div>
             {/* Render Permanent Highlights */}
