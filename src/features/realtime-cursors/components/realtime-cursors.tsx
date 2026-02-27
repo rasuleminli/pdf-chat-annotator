@@ -11,11 +11,13 @@ export const RealtimeCursors = ({
     savedHighlights,
     selections,
     focusedHighlightId,
+    onHighlightClick,
 }: {
     cursors: Record<string, CursorEventPayload>
     savedHighlights: Record<string, HighlightPayload>
     selections: Record<string, SelectionPayload>
     focusedHighlightId: string | null
+    onHighlightClick: (payload: HighlightPayload, x: number, y: number) => void
 }) => {
     return (
         <div>
@@ -25,8 +27,17 @@ export const RealtimeCursors = ({
                     {payload.rects.map((rect, index) => (
                         <div
                             key={`saved-rect-${id}-${index}`}
+                            onClick={(e) => {
+                                // stop propagation so PdfViewer's onMouseDown doesn't dismiss it
+                                e.stopPropagation()
+                                onHighlightClick(
+                                    payload,
+                                    e.clientX + window.scrollX,
+                                    e.clientY + window.scrollY
+                                )
+                            }}
                             className={cn(
-                                'absolute pointer-events-none mix-blend-multiply z-40',
+                                'absolute mix-blend-multiply z-40 cursor-pointer',
                                 focusedHighlightId && focusedHighlightId === id
                                     ? 'opacity-80 animate-pulse'
                                     : 'opacity-40'

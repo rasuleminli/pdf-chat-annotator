@@ -7,6 +7,7 @@ import type { OnDocumentLoadSuccess } from 'react-pdf/src/shared/types.js'
 import { useHighlightPopover } from './popover/use-highlight-popover'
 import { PopoverCard } from './popover/popover-card'
 import type { HandleReferenceInChatFn } from '@/features/references/lib/types'
+import type { HighlightPayload } from '@/features/realtime-cursors/hooks/states/use-selection-state'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -18,8 +19,16 @@ const pageNumber = 1
 
 export function PdfViewer({
     handleReferenceInChat,
+    clickedHighlight,
+    closeClickedHighlight,
 }: {
     handleReferenceInChat: HandleReferenceInChatFn
+    clickedHighlight: {
+        payload: HighlightPayload
+        x: number
+        y: number
+    } | null
+    closeClickedHighlight: () => void
 }) {
     const [numPages, setNumPages] = useState<number>()
 
@@ -39,7 +48,10 @@ export function PdfViewer({
         <div
             ref={containerRef}
             onMouseUp={handleMouseUp}
-            onMouseDown={handleMouseDown}
+            onMouseDown={() => {
+                handleMouseDown()
+                closeClickedHighlight()
+            }}
             className="border rounded-md overflow-hidden shrink-0"
         >
             <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
@@ -51,6 +63,20 @@ export function PdfViewer({
                     popover={popover}
                     setPopover={setPopover}
                     handleReferenceInChat={handleReferenceInChat}
+                />
+            )}
+
+            {clickedHighlight && (
+                <PopoverCard
+                    popover={{
+                        x: clickedHighlight.x,
+                        y: clickedHighlight.y,
+                        text: clickedHighlight.payload.text,
+                        rects: clickedHighlight.payload.rects,
+                    }}
+                    setPopover={setPopover}
+                    handleReferenceInChat={handleReferenceInChat}
+                    userName={clickedHighlight.payload.user.name}
                 />
             )}
 
