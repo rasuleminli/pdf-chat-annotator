@@ -90,7 +90,7 @@ export const useSelectionState = ({
                 color,
             }
 
-            setSelections((prev) => ({
+            setSavedHighlights((prev) => ({
                 ...prev,
                 [highlightId]: payload,
             }))
@@ -109,7 +109,7 @@ export const useSelectionState = ({
 
     const removeHighlight = useCallback(
         (highlightId: string) => {
-            setSelections((prev) => {
+            setSavedHighlights((prev) => {
                 const newSelections = { ...prev }
                 delete newSelections[highlightId]
                 return newSelections

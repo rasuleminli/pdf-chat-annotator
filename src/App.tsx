@@ -23,11 +23,12 @@ function App() {
     })
 
     const {
-        handleReferenceInChat,
         pendingHighlightRef,
+        focusedHighlightId,
+        handleReferenceInChat,
         clearPendingRef,
         dismissPendingRef,
-        setFocusedHighlightId,
+        handleFocusHighlight,
     } = useReferences({ addHighlight, removeHighlight })
 
     return (
@@ -37,13 +38,14 @@ function App() {
                 pendingHighlightRef={pendingHighlightRef}
                 clearPendingRef={clearPendingRef}
                 dismissPendingRef={dismissPendingRef}
-                setFocusedHighlightId={setFocusedHighlightId}
+                handleFocusHighlight={handleFocusHighlight}
             />
             {user && (
                 <RealtimeCursors
                     cursors={cursors}
                     savedHighlights={savedHighlights}
                     selections={selections}
+                    focusedHighlightId={focusedHighlightId}
                 />
             )}
         </div>

@@ -4,15 +4,18 @@ import type {
     HighlightPayload,
     SelectionPayload,
 } from '../hooks/states/use-selection-state'
+import { cn } from '@/lib/utils'
 
 export const RealtimeCursors = ({
     cursors,
     savedHighlights,
     selections,
+    focusedHighlightId,
 }: {
     cursors: Record<string, CursorEventPayload>
     savedHighlights: Record<string, HighlightPayload>
     selections: Record<string, SelectionPayload>
+    focusedHighlightId: string | null
 }) => {
     return (
         <div>
@@ -22,7 +25,12 @@ export const RealtimeCursors = ({
                     {payload.rects.map((rect, index) => (
                         <div
                             key={`saved-rect-${id}-${index}`}
-                            className="absolute pointer-events-none mix-blend-multiply opacity-40 z-40"
+                            className={cn(
+                                'absolute pointer-events-none mix-blend-multiply z-40',
+                                focusedHighlightId && focusedHighlightId === id
+                                    ? 'opacity-80 animate-pulse'
+                                    : 'opacity-40'
+                            )}
                             style={{
                                 top: rect.y,
                                 left: rect.x,

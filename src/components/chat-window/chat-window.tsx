@@ -26,14 +26,14 @@ import type { HighlightReference } from '@/features/references/lib/types'
 
 type ChatWindowProps = {
     pendingHighlightRef: HighlightReference | null
-    setFocusedHighlightId: (id: string) => void
+    handleFocusHighlight: (highlightId: string) => void
     clearPendingRef: () => void
     dismissPendingRef: () => void
 }
 
 function ChatInner({
     pendingHighlightRef,
-    setFocusedHighlightId,
+    handleFocusHighlight,
     clearPendingRef,
     dismissPendingRef,
 }: ChatWindowProps) {
@@ -116,7 +116,7 @@ function ChatInner({
                                         {highlightRef && (
                                             <button
                                                 onClick={() =>
-                                                    setFocusedHighlightId(
+                                                    handleFocusHighlight(
                                                         highlightRef.id
                                                     )
                                                 }

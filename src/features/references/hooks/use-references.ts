@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { HighlightReference } from '../lib/types'
 import type { SelectionRect } from '@/features/realtime-cursors/hooks/lib/types'
+
+const PULSE_ANIMATION_DURATION = 1500
 
 export const useReferences = ({
     addHighlight,
@@ -15,11 +17,22 @@ export const useReferences = ({
         useState<HighlightReference | null>(null)
 
     // This will be used to trigger the flash animation and scroll to the highlight.
-    // TODO: Implement the flash animation.
     // TODO: Implement scrolling (switching page) to the highlight.
     const [focusedHighlightId, setFocusedHighlightId] = useState<string | null>(
         null
     )
+
+    const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const handleFocusHighlight = (highlightId: string) => {
+        if (focusTimerRef.current) {
+            clearTimeout(focusTimerRef.current)
+        }
+        setFocusedHighlightId(highlightId)
+        focusTimerRef.current = setTimeout(
+            () => setFocusedHighlightId(null),
+            PULSE_ANIMATION_DURATION
+        )
+    }
 
     // Called from PopoverCard. Saves the highlight and queues it as a pending
     // reference in the chat input.
@@ -40,10 +53,11 @@ export const useReferences = ({
     }
 
     return {
-        handleReferenceInChat,
         pendingHighlightRef,
+        focusedHighlightId,
+        handleReferenceInChat,
         clearPendingRef,
         dismissPendingRef,
-        setFocusedHighlightId,
+        handleFocusHighlight,
     }
 }
