@@ -90,6 +90,12 @@ export const useSelectionState = ({
                 color,
             }
 
+            // If the highlight already exists, reuse it.
+            const existing = Object.values(savedHighlights).find(
+                (highlight) => highlight.text === text
+            )
+            if (existing) return existing.id
+
             setSavedHighlights((prev) => ({
                 ...prev,
                 [highlightId]: payload,
@@ -104,7 +110,7 @@ export const useSelectionState = ({
 
             return highlightId
         },
-        [color, userId, username, channelRef]
+        [userId, username, color, savedHighlights, channelRef]
     )
 
     const removeHighlight = useCallback(
