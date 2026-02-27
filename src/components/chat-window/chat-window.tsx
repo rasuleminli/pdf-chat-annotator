@@ -141,44 +141,48 @@ function ChatInner({
                     {/* We wrap the textarea into form so that we can submit the form
                     by clicking on the send button without repeating ourselves. */}
                     <form
-                        className="w-full flex flex-row-reverse items-center justify-between"
+                        className="w-full flex flex-col items-start"
                         onSubmit={handleSubmitMessage}
                     >
+                        <div className="flex items-center w-full">
+                            <ChatToolbarTextarea
+                                autoFocus
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                // Textarea inserts new line on Enter by default, but we want to submit the form instead.
+                                // To insert a new line, the user needs to press Shift+Enter (very common in chat apps).
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.currentTarget.form?.requestSubmit()
+                                    }
+                                }}
+                            />
+
+                            <ChatToolbarAddon>
+                                <ChatToolbarButton
+                                    type="submit"
+                                    disabled={!isValidMessage}
+                                >
+                                    <SendIcon />
+                                </ChatToolbarButton>
+                            </ChatToolbarAddon>
+                        </div>
+
                         {pendingHighlightRef && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-950 border border-blue-700 rounded-md text-sm text-blue-300">
+                            <div className="flex items-center gap-2 pl-3 pr-9 py-1.5 mt-2 bg-gray-100 border rounded-md text-sm relative overflow-hidden">
                                 <span className="truncate max-w-[200px]">
                                     "{pendingHighlightRef.text}"
                                 </span>
                                 <button
+                                    type="button"
                                     onClick={dismissPendingRef}
-                                    className="ml-auto text-blue-400 hover:text-white"
+                                    className="ml-auto w-7 cursor-pointer text-foreground absolute top-0 right-0 bottom-0 hover:bg-foreground/10 flex items-center justify-center"
+                                    aria-label="Dismiss highlight"
                                 >
-                                    <XIcon />
+                                    <XIcon className="size-5" />
                                 </button>
                             </div>
                         )}
-
-                        <ChatToolbarTextarea
-                            autoFocus
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            // Textarea inserts new line on Enter by default, but we want to submit the form instead.
-                            // To insert a new line, the user needs to press Shift+Enter (very common in chat apps).
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.currentTarget.form?.requestSubmit()
-                                }
-                            }}
-                        />
-
-                        <ChatToolbarAddon>
-                            <ChatToolbarButton
-                                type="submit"
-                                disabled={!isValidMessage}
-                            >
-                                <SendIcon />
-                            </ChatToolbarButton>
-                        </ChatToolbarAddon>
                     </form>
                 </ChatToolbar>
             </Chat>

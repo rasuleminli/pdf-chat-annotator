@@ -127,20 +127,18 @@ export function ChatToolbarTextarea({
     }
 
     return (
-        <div className="flex-1 min-w-0 order-2 grid">
-            <Textarea
-                id="toolbar-input"
-                placeholder="Type your message..."
-                className={cn(
-                    'h-fit min-h-10 max-h-30 px-1 @md/chat:text-base',
-                    'border-none shadow-none focus-visible:border-none focus-visible:ring-0 placeholder:whitespace-nowrap resize-none',
-                    className
-                )}
-                rows={1}
-                onKeyDown={handleKeyDown}
-                {...props}
-            />
-        </div>
+        <Textarea
+            id="toolbar-input"
+            placeholder="Type your message..."
+            className={cn(
+                'h-fit min-h-10 max-h-30 px-1 @md/chat:text-base',
+                'border-none shadow-none focus-visible:border-none focus-visible:ring-0 placeholder:whitespace-nowrap resize-none',
+                className
+            )}
+            rows={1}
+            onKeyDown={handleKeyDown}
+            {...props}
+        />
     )
 }
 
