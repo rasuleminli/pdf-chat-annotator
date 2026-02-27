@@ -4,4 +4,5 @@ export const EVENTS = {
     CURSOR_MOVE: 'cursor-move',
     SELECTION: 'selection',
     ADD_HIGHLIGHT: 'add-highlight',
+    REMOVE_HIGHLIGHT: 'remove-highlight',
 } as const

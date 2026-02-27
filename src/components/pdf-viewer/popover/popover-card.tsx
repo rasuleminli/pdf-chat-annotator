@@ -1,15 +1,15 @@
-import type { SelectionRect } from '@/features/realtime-cursors/hooks/lib/types'
-import type { PopoverState } from './types'
 import type { Dispatch, SetStateAction } from 'react'
+import type { PopoverState } from './types'
+import type { HandleReferenceInChatFn } from '@/features/references/lib/types'
 
 export function PopoverCard({
     popover,
     setPopover,
-    addHighlight,
+    onReferenceInChat,
 }: {
     popover: PopoverState
     setPopover: Dispatch<SetStateAction<PopoverState | null>>
-    addHighlight: (rects: SelectionRect[], text: string) => string
+    onReferenceInChat: HandleReferenceInChatFn
 }) {
     return (
         <div
@@ -27,13 +27,7 @@ export function PopoverCard({
             <button
                 className="text-sm text-blue-400 hover:text-blue-300 font-semibold whitespace-nowrap transition-colors"
                 onClick={() => {
-                    const highlightId = addHighlight(
-                        popover.rects,
-                        popover.text
-                    )
-
-                    // TODO: Pass this highlightId to the chat input
-                    console.log('Pass this to chat:', highlightId)
+                    onReferenceInChat(popover.rects, popover.text)
 
                     // Clear the popover state
                     setPopover(null)

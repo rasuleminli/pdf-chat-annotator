@@ -107,11 +107,30 @@ export const useSelectionState = ({
         [color, userId, username, channelRef]
     )
 
+    const removeHighlight = useCallback(
+        (highlightId: string) => {
+            setSelections((prev) => {
+                const newSelections = { ...prev }
+                delete newSelections[highlightId]
+                return newSelections
+            })
+
+            // Broadcast to the room
+            channelRef.current?.send({
+                type: 'broadcast',
+                event: EVENTS.REMOVE_HIGHLIGHT,
+                payload: { id: highlightId },
+            })
+        },
+        [channelRef]
+    )
+
     return {
         selections,
         setSelections,
-        addHighlight,
         savedHighlights,
         setSavedHighlights,
+        addHighlight,
+        removeHighlight,
     }
 }

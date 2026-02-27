@@ -5,8 +5,8 @@ import 'react-pdf/dist/Page/TextLayer.css'
 
 import type { OnDocumentLoadSuccess } from 'react-pdf/src/shared/types.js'
 import { useHighlightPopover } from './popover/use-highlight-popover'
-import type { SelectionRect } from '@/features/realtime-cursors/hooks/lib/types'
 import { PopoverCard } from './popover/popover-card'
+import type { HandleReferenceInChatFn } from '@/features/references/lib/types'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -17,9 +17,9 @@ const file = '/sample.pdf'
 const pageNumber = 1
 
 export function PdfViewer({
-    addHighlight,
+    onReferenceInChat,
 }: {
-    addHighlight: (rects: SelectionRect[], text: string) => string
+    onReferenceInChat: HandleReferenceInChatFn
 }) {
     const [numPages, setNumPages] = useState<number>()
 
@@ -50,7 +50,7 @@ export function PdfViewer({
                 <PopoverCard
                     popover={popover}
                     setPopover={setPopover}
-                    addHighlight={addHighlight}
+                    onReferenceInChat={onReferenceInChat}
                 />
             )}
 

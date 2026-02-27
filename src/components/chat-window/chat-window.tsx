@@ -1,5 +1,5 @@
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import { SendIcon } from 'lucide-react'
+import { BookmarkIcon, SendIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Chat } from './chat/chat'
 import {
@@ -22,8 +22,19 @@ import { AuthJoinChatForm } from './components/auth-join-chat-form'
 import { useLiveChat } from './hooks/use-live-chat'
 import { ChatMetadata } from './components/chat-metadata'
 import { cn } from '@/lib/utils'
+import type { HighlightReference } from '@/features/references/lib/types'
 
-function ChatInner() {
+type ChatWindowProps = {
+    pendingHighlightRef: HighlightReference | null
+    onClearPendingRef: () => void
+    onFocusHighlight: (id: string) => void
+}
+
+function ChatInner({
+    pendingHighlightRef,
+    onClearPendingRef,
+    onFocusHighlight,
+}: ChatWindowProps) {
     const { user, loading: isUserLoading } = useAuth()
 
     const { messages, sendMessage } = useLiveChat(user)
@@ -43,8 +54,9 @@ function ChatInner() {
     const handleSubmitMessage = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!isValidMessage) return
-        sendMessage(message)
+        sendMessage(message, pendingHighlightRef ?? undefined)
         setMessage('')
+        onClearPendingRef()
     }
 
     if (isUserLoading) {
@@ -93,6 +105,19 @@ function ChatInner() {
                                         <ChatEventContent>
                                             {text}
                                         </ChatEventContent>
+                                        {pendingHighlightRef && (
+                                            <button
+                                                onClick={() =>
+                                                    onFocusHighlight(
+                                                        pendingHighlightRef.id
+                                                    )
+                                                }
+                                                className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-900/50 border border-blue-700 text-xs text-blue-300 hover:bg-blue-800 transition-colors"
+                                            >
+                                                <BookmarkIcon className="w-3 h-3" />
+                                                "{pendingHighlightRef.text}"
+                                            </button>
+                                        )}
                                     </ChatEventBody>
                                 </ChatEvent>
                             )
@@ -111,6 +136,20 @@ function ChatInner() {
                         className="w-full flex flex-row-reverse items-center justify-between"
                         onSubmit={handleSubmitMessage}
                     >
+                        {pendingHighlightRef && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-950 border border-blue-700 rounded-md text-sm text-blue-300">
+                                <span className="truncate max-w-[200px]">
+                                    "{pendingHighlightRef.text}"
+                                </span>
+                                <button
+                                    onClick={onClearPendingRef}
+                                    className="ml-auto text-blue-400 hover:text-white"
+                                >
+                                    <XIcon />
+                                </button>
+                            </div>
+                        )}
+
                         <ChatToolbarTextarea
                             autoFocus
                             value={message}
@@ -139,10 +178,10 @@ function ChatInner() {
     )
 }
 
-export function ChatWindow() {
+export function ChatWindow(chatWindowProps: ChatWindowProps) {
     return (
         <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px] relative">
-            <ChatInner />
+            <ChatInner {...chatWindowProps} />
         </div>
     )
 }

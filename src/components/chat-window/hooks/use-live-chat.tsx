@@ -1,4 +1,5 @@
 import { getUserDisplayName } from '@/features/auth/utils/get-user-display-name'
+import type { HighlightReference } from '@/features/references/lib/types'
 import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
@@ -9,6 +10,7 @@ type Message = {
     user: { name: string; id: string }
     text: string
     timestamp: number
+    highlightRef?: HighlightReference
 }
 
 const CHANNEL_NAME = 'chat_room'
@@ -71,7 +73,10 @@ export function useLiveChat(user: User | null) {
         }
     }, [user])
 
-    const sendMessage = async (content: string) => {
+    const sendMessage = async (
+        content: string,
+        highlightRef?: HighlightReference
+    ) => {
         if (!user) return
 
         const message: Message = {
@@ -79,6 +84,7 @@ export function useLiveChat(user: User | null) {
             user: { name: getUserDisplayName(user), id: user.id },
             text: content,
             timestamp: Date.now(),
+            highlightRef,
         }
 
         // Send directly to other clients

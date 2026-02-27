@@ -52,6 +52,7 @@ export const useRealtimeCursors = ({
         savedHighlights,
         setSavedHighlights,
         addHighlight,
+        removeHighlight,
     } = useSelectionState({
         userId,
         username,
@@ -105,6 +106,17 @@ export const useRealtimeCursors = ({
                         ...prev,
                         [data.payload.id]: data.payload,
                     }))
+                }
+            )
+            .on(
+                'broadcast',
+                { event: EVENTS.REMOVE_HIGHLIGHT },
+                (data: { payload: { id: string } }) => {
+                    setSavedHighlights((prev) => {
+                        const next = { ...prev }
+                        delete next[data.payload.id]
+                        return next
+                    })
                 }
             )
             .on(
@@ -178,5 +190,11 @@ export const useRealtimeCursors = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    return { cursors, selections, savedHighlights, addHighlight }
+    return {
+        cursors,
+        selections,
+        savedHighlights,
+        addHighlight,
+        removeHighlight,
+    }
 }
