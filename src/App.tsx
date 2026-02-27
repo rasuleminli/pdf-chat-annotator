@@ -25,22 +25,19 @@ function App() {
     const {
         handleReferenceInChat,
         pendingHighlightRef,
-        setPendingHighlightRef,
+        clearPendingRef,
+        dismissPendingRef,
         setFocusedHighlightId,
-    } = useReferences({ addHighlight })
+    } = useReferences({ addHighlight, removeHighlight })
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-start gap-5">
             <PdfViewer onReferenceInChat={handleReferenceInChat} />
             <ChatWindow
                 pendingHighlightRef={pendingHighlightRef}
-                onClearPendingRef={() => {
-                    if (pendingHighlightRef) {
-                        removeHighlight(pendingHighlightRef.id)
-                    }
-                    setPendingHighlightRef(null)
-                }}
-                onFocusHighlight={(id) => setFocusedHighlightId(id)}
+                clearPendingRef={clearPendingRef}
+                dismissPendingRef={dismissPendingRef}
+                setFocusedHighlightId={setFocusedHighlightId}
             />
             {user && (
                 <RealtimeCursors

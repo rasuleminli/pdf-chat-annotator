@@ -4,8 +4,10 @@ import type { SelectionRect } from '@/features/realtime-cursors/hooks/lib/types'
 
 export const useReferences = ({
     addHighlight,
+    removeHighlight,
 }: {
     addHighlight: (rects: SelectionRect[], text: string) => string
+    removeHighlight: (highlightId: string) => void
 }) => {
     // Set by PopoverCard when user clicks "Reference in Chat".
     // Passed into ChatWindow so it can show the pending chip.
@@ -26,10 +28,22 @@ export const useReferences = ({
         setPendingHighlightRef({ id, text })
     }
 
+    // Used when message is sent, just clears the pending ref.
+    const clearPendingRef = () => setPendingHighlightRef(null)
+
+    // Used when user clicks the "x" button in the pending ref - also removes the highlight.
+    const dismissPendingRef = () => {
+        if (pendingHighlightRef) {
+            removeHighlight(pendingHighlightRef.id)
+        }
+        setPendingHighlightRef(null)
+    }
+
     return {
         handleReferenceInChat,
         pendingHighlightRef,
-        setPendingHighlightRef,
+        clearPendingRef,
+        dismissPendingRef,
         setFocusedHighlightId,
     }
 }

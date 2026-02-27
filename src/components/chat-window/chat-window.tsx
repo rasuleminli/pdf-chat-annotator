@@ -26,14 +26,16 @@ import type { HighlightReference } from '@/features/references/lib/types'
 
 type ChatWindowProps = {
     pendingHighlightRef: HighlightReference | null
-    onClearPendingRef: () => void
-    onFocusHighlight: (id: string) => void
+    setFocusedHighlightId: (id: string) => void
+    clearPendingRef: () => void
+    dismissPendingRef: () => void
 }
 
 function ChatInner({
     pendingHighlightRef,
-    onClearPendingRef,
-    onFocusHighlight,
+    setFocusedHighlightId,
+    clearPendingRef,
+    dismissPendingRef,
 }: ChatWindowProps) {
     const { user, loading: isUserLoading } = useAuth()
 
@@ -56,7 +58,7 @@ function ChatInner({
         if (!isValidMessage) return
         sendMessage(message, pendingHighlightRef ?? undefined)
         setMessage('')
-        onClearPendingRef()
+        clearPendingRef()
     }
 
     if (isUserLoading) {
@@ -114,7 +116,7 @@ function ChatInner({
                                         {highlightRef && (
                                             <button
                                                 onClick={() =>
-                                                    onFocusHighlight(
+                                                    setFocusedHighlightId(
                                                         highlightRef.id
                                                     )
                                                 }
@@ -148,7 +150,7 @@ function ChatInner({
                                     "{pendingHighlightRef.text}"
                                 </span>
                                 <button
-                                    onClick={onClearPendingRef}
+                                    onClick={dismissPendingRef}
                                     className="ml-auto text-blue-400 hover:text-white"
                                 >
                                     <XIcon />
