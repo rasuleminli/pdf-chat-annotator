@@ -1,5 +1,5 @@
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import { BookmarkIcon, SendIcon, XIcon } from 'lucide-react'
+import { LinkIcon, SendIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Chat } from './chat/chat'
 import {
@@ -75,7 +75,13 @@ function ChatInner({
                 <ChatMessages ref={messagesContainerRef}>
                     {messages.length > 0 ? (
                         messages.map(
-                            ({ id, user: sender, text, timestamp }) => (
+                            ({
+                                id,
+                                user: sender,
+                                text,
+                                timestamp,
+                                highlightRef,
+                            }) => (
                                 <ChatEvent key={id}>
                                     <ChatEventAddon>
                                         <ChatEventAvatar
@@ -105,17 +111,17 @@ function ChatInner({
                                         <ChatEventContent>
                                             {text}
                                         </ChatEventContent>
-                                        {pendingHighlightRef && (
+                                        {highlightRef && (
                                             <button
                                                 onClick={() =>
                                                     onFocusHighlight(
-                                                        pendingHighlightRef.id
+                                                        highlightRef.id
                                                     )
                                                 }
-                                                className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-900/50 border border-blue-700 text-xs text-blue-300 hover:bg-blue-800 transition-colors"
+                                                className="mt-1 inline-flex items-start gap-2.5 py-2 pl-3 pr-4 rounded-md bg-blue-600/10 hover:bg-blue-600/15 active:bg-blue-600/20 text-xs text-blue-600 transition-none text-left cursor-pointer"
                                             >
-                                                <BookmarkIcon className="w-3 h-3" />
-                                                "{pendingHighlightRef.text}"
+                                                <LinkIcon className="size-4 shrink-0 mt-0.5" />
+                                                "{highlightRef.text}"
                                             </button>
                                         )}
                                     </ChatEventBody>
