@@ -10,7 +10,7 @@ export const RealtimeCursors = ({
     roomName: string
     username: string
 }) => {
-    const { cursors } = useRealtimeCursors({
+    const { cursors, selections } = useRealtimeCursors({
         roomName,
         username,
         throttleMs: THROTTLE_MS,
@@ -18,6 +18,24 @@ export const RealtimeCursors = ({
 
     return (
         <div>
+            {Object.entries(selections).map(([id, selectionPayload]) => (
+                <div key={`selection-${id}`}>
+                    {selectionPayload.rects.map((rect, index) => (
+                        <div
+                            key={`rect-${id}-${index}`}
+                            className="absolute pointer-events-none mix-blend-multiply opacity-30 z-40"
+                            style={{
+                                top: rect.y,
+                                left: rect.x,
+                                width: rect.width,
+                                height: rect.height,
+                                backgroundColor: selectionPayload.color,
+                            }}
+                        />
+                    ))}
+                </div>
+            ))}
+
             {Object.keys(cursors).map((id) => (
                 <Cursor
                     key={id}

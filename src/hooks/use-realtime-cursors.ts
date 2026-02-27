@@ -46,8 +46,12 @@ const generateRandomColor = () =>
 
 const generateRandomNumber = () => Math.floor(Math.random() * 100)
 
-const EVENT_NAME = 'realtime-cursor-move'
+const EVENTS = {
+    CURSOR_MOVE: 'cursor-move',
+    TEXT_SELECTION: 'text-selection',
+} as const
 
+// Cursor Move
 type CursorEventPayload = {
     position: {
         x: number
@@ -61,6 +65,15 @@ type CursorEventPayload = {
     timestamp: number
 }
 
+// Text Selection
+type SelectionRect = { x: number; y: number; width: number; height: number }
+type SelectionEventPayload = {
+    rects: SelectionRect[]
+    user: { id: number; name: string }
+    color: string
+}
+
+// TODO: clean-up, separate two states into two different hooks
 export const useRealtimeCursors = ({
     roomName,
     username,
@@ -72,14 +85,19 @@ export const useRealtimeCursors = ({
 }) => {
     const [color] = useState(generateRandomColor())
     const [userId] = useState(generateRandomNumber())
+
+    // States for both events
     const [cursors, setCursors] = useState<Record<string, CursorEventPayload>>(
         {}
     )
-    const cursorPayload = useRef<CursorEventPayload | null>(null)
+    const [selections, setSelections] = useState<
+        Record<string, SelectionEventPayload>
+    >({})
 
+    const cursorPayload = useRef<CursorEventPayload | null>(null)
     const channelRef = useRef<RealtimeChannel | null>(null)
 
-    const callback = useCallback(
+    const cursorCallback = useCallback(
         (event: MouseEvent) => {
             const { clientX, clientY } = event
 
@@ -92,7 +110,7 @@ export const useRealtimeCursors = ({
                     id: userId,
                     name: username,
                 },
-                color: color,
+                color,
                 timestamp: new Date().getTime(),
             }
 
@@ -100,14 +118,50 @@ export const useRealtimeCursors = ({
 
             channelRef.current?.send({
                 type: 'broadcast',
-                event: EVENT_NAME,
-                payload: payload,
+                event: EVENTS.CURSOR_MOVE,
+                payload,
             })
         },
         [color, userId, username]
     )
+    const handleCursorMove = useThrottleCallback(cursorCallback, throttleMs)
 
-    const handleMouseMove = useThrottleCallback(callback, throttleMs)
+    // Selection Callback
+    const selectionCallback = useCallback(() => {
+        const selection = window.getSelection()
+
+        let rects: SelectionRect[] = []
+
+        if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const domRects = Array.from(range.getClientRects())
+
+            // Map DOMRects to custom SelectionRect, accounting for current scroll position
+            rects = domRects.map((rect) => ({
+                x: rect.x + window.scrollX,
+                y: rect.y + window.scrollY,
+                width: rect.width,
+                height: rect.height,
+            }))
+        }
+
+        const payload: SelectionEventPayload = {
+            rects,
+            user: { id: userId, name: username },
+            color,
+        }
+
+        channelRef.current?.send({
+            type: 'broadcast',
+            event: EVENTS.TEXT_SELECTION,
+            payload,
+        })
+    }, [color, userId, username])
+
+    const handleSelectionChange = useThrottleCallback(
+        selectionCallback,
+        throttleMs
+    )
 
     useEffect(() => {
         const channel = supabase.channel(roomName)
@@ -131,13 +185,13 @@ export const useRealtimeCursors = ({
                 // All cursors broadcast their position when a new cursor joins
                 channelRef.current?.send({
                     type: 'broadcast',
-                    event: EVENT_NAME,
+                    event: EVENTS.CURSOR_MOVE,
                     payload: cursorPayload.current,
                 })
             })
             .on(
                 'broadcast',
-                { event: EVENT_NAME },
+                { event: EVENTS.CURSOR_MOVE },
                 (data: { payload: CursorEventPayload }) => {
                     const { user } = data.payload
                     // Don't render your own cursor
@@ -155,12 +209,24 @@ export const useRealtimeCursors = ({
                     })
                 }
             )
+            .on(
+                'broadcast',
+                { event: EVENTS.TEXT_SELECTION },
+                (data: { payload: SelectionEventPayload }) => {
+                    if (data.payload.user.id === userId) return
+                    setSelections((prev) => ({
+                        ...prev,
+                        [data.payload.user.id]: data.payload,
+                    }))
+                }
+            )
             .subscribe(async (status) => {
                 if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
                     await channel.track({ key: userId })
                     channelRef.current = channel
                 } else {
                     setCursors({})
+                    setSelections({})
                     channelRef.current = null
                 }
             })
@@ -174,13 +240,18 @@ export const useRealtimeCursors = ({
 
     useEffect(() => {
         // Add event listener for mousemove
-        window.addEventListener('mousemove', handleMouseMove)
+        window.addEventListener('mousemove', handleCursorMove)
+        document.addEventListener('selectionchange', handleSelectionChange)
 
         // Cleanup on unmount
         return () => {
-            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mousemove', handleCursorMove)
+            document.removeEventListener(
+                'selectionchange',
+                handleSelectionChange
+            )
         }
-    }, [handleMouseMove])
+    }, [handleCursorMove, handleSelectionChange])
 
-    return { cursors }
+    return { cursors, selections }
 }

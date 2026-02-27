@@ -1,5 +1,3 @@
-import './App.css'
-
 import { ChatWindow } from './components/chat-window'
 import { RealtimeCursors } from './components/realtime-cursors'
 import { useAuth } from './features/auth/hooks/use-auth'
