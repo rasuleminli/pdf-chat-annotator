@@ -17,9 +17,9 @@ const file = '/sample.pdf'
 const pageNumber = 1
 
 export function PdfViewer({
-    onReferenceInChat,
+    handleReferenceInChat,
 }: {
-    onReferenceInChat: HandleReferenceInChatFn
+    handleReferenceInChat: HandleReferenceInChatFn
 }) {
     const [numPages, setNumPages] = useState<number>()
 
@@ -50,7 +50,7 @@ export function PdfViewer({
                 <PopoverCard
                     popover={popover}
                     setPopover={setPopover}
-                    onReferenceInChat={onReferenceInChat}
+                    handleReferenceInChat={handleReferenceInChat}
                 />
             )}
 

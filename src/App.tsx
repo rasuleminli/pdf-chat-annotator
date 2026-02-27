@@ -33,7 +33,7 @@ function App() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-start gap-5">
-            <PdfViewer onReferenceInChat={handleReferenceInChat} />
+            <PdfViewer handleReferenceInChat={handleReferenceInChat} />
             <ChatWindow
                 pendingHighlightRef={pendingHighlightRef}
                 clearPendingRef={clearPendingRef}

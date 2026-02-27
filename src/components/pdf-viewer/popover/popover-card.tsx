@@ -5,11 +5,11 @@ import type { HandleReferenceInChatFn } from '@/features/references/lib/types'
 export function PopoverCard({
     popover,
     setPopover,
-    onReferenceInChat,
+    handleReferenceInChat,
 }: {
     popover: PopoverState
     setPopover: Dispatch<SetStateAction<PopoverState | null>>
-    onReferenceInChat: HandleReferenceInChatFn
+    handleReferenceInChat: HandleReferenceInChatFn
 }) {
     return (
         <div
@@ -27,7 +27,7 @@ export function PopoverCard({
             <button
                 className="text-sm text-blue-400 hover:text-blue-300 font-semibold whitespace-nowrap transition-colors"
                 onClick={() => {
-                    onReferenceInChat(popover.rects, popover.text)
+                    handleReferenceInChat(popover.rects, popover.text)
 
                     // Clear the popover state
                     setPopover(null)

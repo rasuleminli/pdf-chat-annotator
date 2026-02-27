@@ -37,6 +37,11 @@ export const useReferences = ({
     // Called from PopoverCard. Saves the highlight and queues it as a pending
     // reference in the chat input.
     const handleReferenceInChat = (rects: SelectionRect[], text: string) => {
+        // Remove the pending highlight if it exists.
+        // (since there can only be one pending highlight at a time)
+        if (pendingHighlightRef) {
+            removeHighlight(pendingHighlightRef.id)
+        }
         const id = addHighlight(rects, text)
         setPendingHighlightRef({ id, text })
     }
