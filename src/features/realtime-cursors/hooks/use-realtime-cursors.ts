@@ -12,7 +12,8 @@ import {
 } from './states/use-cursor-state'
 import {
     useSelectionState,
-    type SelectionEventPayload,
+    type HighlightPayload,
+    type SelectionPayload,
 } from './states/use-selection-state'
 
 /**
@@ -26,7 +27,7 @@ const generateRandomNumber = () => Math.floor(Math.random() * 100)
 /**
  * Main hook that handles both cursors and selections states.
  */
-export const useRealtimeCollaboration = ({
+export const useRealtimeCursors = ({
     roomName,
     username,
 }: {
@@ -45,7 +46,13 @@ export const useRealtimeCollaboration = ({
         channelRef,
     })
 
-    const { selections, setSelections } = useSelectionState({
+    const {
+        selections,
+        setSelections,
+        savedHighlights,
+        setSavedHighlights,
+        addHighlight,
+    } = useSelectionState({
         userId,
         username,
         color,
@@ -56,27 +63,6 @@ export const useRealtimeCollaboration = ({
         const channel = supabase.channel(roomName)
 
         channel
-            .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-                leftPresences.forEach((element) => {
-                    // Remove cursor when user leaves
-                    setCursors((prev) => {
-                        if (prev[element.key]) {
-                            delete prev[element.key]
-                        }
-
-                        return { ...prev }
-                    })
-                    // Clear selections when user leaves
-                    setSelections((prev) => {
-                        if (prev[element.key]) {
-                            const newSelections = { ...prev }
-                            delete newSelections[element.key]
-                            return newSelections
-                        }
-                        return prev
-                    })
-                })
-            })
             .on('presence', { event: 'join' }, () => {
                 if (!cursorPayload.current) return
 
@@ -86,6 +72,8 @@ export const useRealtimeCollaboration = ({
                     event: EVENTS.CURSOR_MOVE,
                     payload: cursorPayload.current,
                 })
+
+                // TODO: implement a mechanism to share the existing selections with the new joined user
             })
             .on(
                 'broadcast',
@@ -110,15 +98,68 @@ export const useRealtimeCollaboration = ({
             )
             .on(
                 'broadcast',
-                { event: EVENTS.TEXT_SELECTION },
-                (data: { payload: SelectionEventPayload }) => {
+                { event: EVENTS.ADD_HIGHLIGHT },
+                (data: { payload: HighlightPayload }) => {
                     if (data.payload.user.id === userId) return
-                    setSelections((prev) => ({
+                    setSavedHighlights((prev) => ({
                         ...prev,
-                        [data.payload.user.id]: data.payload,
+                        [data.payload.id]: data.payload,
                     }))
                 }
             )
+            .on(
+                'broadcast',
+                { event: EVENTS.SELECTION },
+                (data: { payload: SelectionPayload }) => {
+                    if (data.payload.user.id === userId) return
+
+                    setSelections((prev) => {
+                        // If rects are empty, the user cleared their selection
+                        if (data.payload.rects.length === 0) {
+                            const newState = { ...prev }
+                            delete newState[data.payload.user.id]
+                            return newState
+                        }
+                        return {
+                            ...prev,
+                            [data.payload.user.id]: data.payload,
+                        }
+                    })
+                }
+            )
+            .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+                leftPresences.forEach((element) => {
+                    // Remove cursor
+                    setCursors((prev) => {
+                        if (prev[element.key]) {
+                            delete prev[element.key]
+                        }
+
+                        return { ...prev }
+                    })
+
+                    // Clear temporary selection
+                    setSelections((prev) => {
+                        const newActive = { ...prev }
+                        delete newActive[element.key]
+                        return newActive
+                    })
+
+                    // Clear saved highlights tied to this user
+                    setSavedHighlights((prev) => {
+                        const newSaved = { ...prev }
+                        Object.keys(newSaved).forEach((highlightId) => {
+                            if (
+                                newSaved[highlightId].user.id.toString() ===
+                                element.key
+                            ) {
+                                delete newSaved[highlightId]
+                            }
+                        })
+                        return newSaved
+                    })
+                })
+            })
             .subscribe(async (status) => {
                 if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
                     await channel.track({ key: userId })
@@ -137,5 +178,5 @@ export const useRealtimeCollaboration = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    return { cursors, selections }
+    return { cursors, selections, savedHighlights, addHighlight }
 }

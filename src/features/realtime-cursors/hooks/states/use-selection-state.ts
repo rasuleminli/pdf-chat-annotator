@@ -10,10 +10,15 @@ type SelectionRect = {
     height: number
 }
 
-export type SelectionEventPayload = {
+export type SelectionPayload = {
     rects: SelectionRect[]
     user: { id: number; name: string }
     color: string
+}
+
+export type HighlightPayload = SelectionPayload & {
+    id: string
+    text: string
 }
 
 export const useSelectionState = ({
@@ -27,8 +32,14 @@ export const useSelectionState = ({
     color: string
     channelRef: React.RefObject<RealtimeChannel | null>
 }) => {
+    // 1 per user
     const [selections, setSelections] = useState<
-        Record<string, SelectionEventPayload>
+        Record<string, SelectionPayload>
+    >({})
+
+    // unlimited per user
+    const [savedHighlights, setSavedHighlights] = useState<
+        Record<string, HighlightPayload>
     >({})
 
     const selectionCallback = useCallback(() => {
@@ -38,7 +49,6 @@ export const useSelectionState = ({
         if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0)
             const domRects = Array.from(range.getClientRects())
-            // Map DOMRects to custom SelectionRect, accounting for current scroll position
             rects = domRects.map((rect) => ({
                 x: rect.x + window.scrollX,
                 y: rect.y + window.scrollY,
@@ -47,7 +57,7 @@ export const useSelectionState = ({
             }))
         }
 
-        const payload: SelectionEventPayload = {
+        const payload: SelectionPayload = {
             rects,
             user: { id: userId, name: username },
             color,
@@ -55,7 +65,7 @@ export const useSelectionState = ({
 
         channelRef.current?.send({
             type: 'broadcast',
-            event: EVENTS.TEXT_SELECTION,
+            event: EVENTS.SELECTION,
             payload,
         })
     }, [color, userId, username, channelRef])
@@ -74,5 +84,40 @@ export const useSelectionState = ({
             )
     }, [handleSelectionChange])
 
-    return { selections, setSelections }
+    const addHighlight = useCallback(
+        (rects: SelectionRect[], text: string) => {
+            const highlightId = crypto.randomUUID()
+
+            const payload: HighlightPayload = {
+                id: highlightId,
+                text,
+                rects,
+                user: { id: userId, name: username },
+                color,
+            }
+
+            setSelections((prev) => ({
+                ...prev,
+                [highlightId]: payload,
+            }))
+
+            // Broadcast to the room
+            channelRef.current?.send({
+                type: 'broadcast',
+                event: EVENTS.ADD_HIGHLIGHT,
+                payload,
+            })
+
+            return highlightId
+        },
+        [color, userId, username, channelRef]
+    )
+
+    return {
+        selections,
+        setSelections,
+        addHighlight,
+        savedHighlights,
+        setSavedHighlights,
+    }
 }
