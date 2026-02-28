@@ -1,24 +1,18 @@
-import { Cursor } from '@/components/cursor'
-import type { CursorEventPayload } from '../hooks/states/use-cursor-state'
-import type {
-    HighlightPayload,
-    SelectionPayload,
-} from '../hooks/states/use-selection-state'
+import { usePdfViewerContext } from '@/features/pdf-viewer/providers/pdf-viewer-provider'
+import { useReferencesContext } from '@/features/references/providers/references-provider'
 import { cn } from '@/lib/utils'
+import { useRealtimeCursorsContext } from '../providers/realtime-cursors-provider'
+import { Cursor } from './cursor'
+import { useAuthContext } from '@/features/auth/providers/auth-provider'
 
-export const RealtimeCursors = ({
-    cursors,
-    savedHighlights,
-    selections,
-    focusedHighlightId,
-    onHighlightClick,
-}: {
-    cursors: Record<string, CursorEventPayload>
-    savedHighlights: Record<string, HighlightPayload>
-    selections: Record<string, SelectionPayload>
-    focusedHighlightId: string | null
-    onHighlightClick: (payload: HighlightPayload, x: number, y: number) => void
-}) => {
+export const RealtimeCursors = () => {
+    const { user } = useAuthContext()
+    const { setClickedHighlight } = usePdfViewerContext()
+    const { savedHighlights, selections, cursors } = useRealtimeCursorsContext()
+    const { focusedHighlightId } = useReferencesContext()
+
+    if (!user) return null
+
     return (
         <div>
             {/* Render Permanent Highlights */}
@@ -30,11 +24,11 @@ export const RealtimeCursors = ({
                             onClick={(e) => {
                                 // stop propagation so PdfViewer's onMouseDown doesn't dismiss it
                                 e.stopPropagation()
-                                onHighlightClick(
+                                setClickedHighlight({
                                     payload,
-                                    e.clientX + window.scrollX,
-                                    e.clientY + window.scrollY
-                                )
+                                    x: e.clientX + window.scrollX,
+                                    y: e.clientY + window.scrollY,
+                                })
                             }}
                             className={cn(
                                 'absolute mix-blend-multiply z-40 cursor-pointer',

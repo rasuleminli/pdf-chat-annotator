@@ -2,29 +2,17 @@ import { RealtimeChannel } from '@supabase/supabase-js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useThrottleCallback } from '../use-throttle-callback'
-import { EVENTS, THROTTLE_MS } from '../lib/constants'
-
-export type CursorEventPayload = {
-    position: {
-        x: number
-        y: number
-    }
-    user: {
-        id: number
-        name: string
-    }
-    color: string
-    timestamp: number
-}
+import { EVENTS, THROTTLE_MS } from '../../lib/constants'
+import type { CursorEventPayload } from '../../lib/types'
 
 export const useCursorState = ({
     userId,
-    username,
+    userName,
     color,
     channelRef,
 }: {
     userId: number
-    username: string
+    userName: string
     color: string
     channelRef: React.RefObject<RealtimeChannel | null>
 }) => {
@@ -37,7 +25,7 @@ export const useCursorState = ({
         (event: MouseEvent) => {
             const payload: CursorEventPayload = {
                 position: { x: event.clientX, y: event.clientY },
-                user: { id: userId, name: username },
+                user: { id: userId, name: userName },
                 color,
                 timestamp: new Date().getTime(),
             }
@@ -49,7 +37,7 @@ export const useCursorState = ({
                 payload,
             })
         },
-        [color, userId, username, channelRef]
+        [color, userId, userName, channelRef]
     )
 
     const handleCursorMove = useThrottleCallback(cursorCallback, THROTTLE_MS)

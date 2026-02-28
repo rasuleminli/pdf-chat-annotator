@@ -1,6 +1,11 @@
-import { useAuth } from '@/features/auth/hooks/use-auth'
+import { useAuthContext } from '@/features/auth/providers/auth-provider'
+import { useReferencesContext } from '@/features/references/providers/references-provider'
+import { cn } from '@/lib/utils'
 import { LinkIcon, SendIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { ChatProvider, useChatContext } from '../providers/chat-provider'
+import { AuthJoinChatForm } from './auth-join-chat-form'
+import { ChatMetadata } from './chat-metadata'
 import { Chat } from './chat/chat'
 import {
     ChatEvent,
@@ -18,28 +23,28 @@ import {
     ChatToolbarButton,
     ChatToolbarTextarea,
 } from './chat/chat-toolbar'
-import { AuthJoinChatForm } from './components/auth-join-chat-form'
-import { useLiveChat } from './hooks/use-live-chat'
-import { ChatMetadata } from './components/chat-metadata'
-import { cn } from '@/lib/utils'
-import type { HighlightReference } from '@/features/references/lib/types'
 
-type ChatWindowProps = {
-    pendingHighlightRef: HighlightReference | null
-    handleFocusHighlight: (highlightId: string) => void
-    clearPendingRef: () => void
-    dismissPendingRef: () => void
+export function ChatWindow() {
+    return (
+        <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px] relative">
+            <ChatProvider>
+                <ChatWindowInner />
+            </ChatProvider>
+        </div>
+    )
 }
 
-function ChatInner({
-    pendingHighlightRef,
-    handleFocusHighlight,
-    clearPendingRef,
-    dismissPendingRef,
-}: ChatWindowProps) {
-    const { user, loading: isUserLoading } = useAuth()
+function ChatWindowInner() {
+    const { user, loading: isUserLoading } = useAuthContext()
 
-    const { messages, sendMessage } = useLiveChat(user)
+    const {
+        pendingHighlightRef,
+        handleFocusHighlight,
+        clearPendingRef,
+        dismissPendingRef,
+    } = useReferencesContext()
+
+    const { messages, sendMessage } = useChatContext()
 
     const [message, setMessage] = useState('')
     const isValidMessage = message.trim().length > 0
@@ -186,14 +191,6 @@ function ChatInner({
                     </form>
                 </ChatToolbar>
             </Chat>
-        </div>
-    )
-}
-
-export function ChatWindow(chatWindowProps: ChatWindowProps) {
-    return (
-        <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px] relative">
-            <ChatInner {...chatWindowProps} />
         </div>
     )
 }

@@ -1,28 +1,21 @@
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useCallback, useEffect, useState } from 'react'
-import { EVENTS, THROTTLE_MS } from '../lib/constants'
+import { EVENTS, THROTTLE_MS } from '../../lib/constants'
 import { useThrottleCallback } from '../use-throttle-callback'
-import type { SelectionRect } from '../lib/types'
-
-export type SelectionPayload = {
-    rects: SelectionRect[]
-    user: { id: number; name: string }
-    color: string
-}
-
-export type HighlightPayload = SelectionPayload & {
-    id: string
-    text: string
-}
+import type {
+    HighlightPayload,
+    SelectionPayload,
+    SelectionRect,
+} from '@/lib/types'
 
 export const useSelectionState = ({
     userId,
-    username,
+    userName,
     color,
     channelRef,
 }: {
     userId: number
-    username: string
+    userName: string
     color: string
     channelRef: React.RefObject<RealtimeChannel | null>
 }) => {
@@ -53,7 +46,7 @@ export const useSelectionState = ({
 
         const payload: SelectionPayload = {
             rects,
-            user: { id: userId, name: username },
+            user: { id: userId, name: userName },
             color,
         }
 
@@ -62,7 +55,7 @@ export const useSelectionState = ({
             event: EVENTS.SELECTION,
             payload,
         })
-    }, [color, userId, username, channelRef])
+    }, [color, userId, userName, channelRef])
 
     const handleSelectionChange = useThrottleCallback(
         selectionCallback,
@@ -86,7 +79,7 @@ export const useSelectionState = ({
                 id: highlightId,
                 text,
                 rects,
-                user: { id: userId, name: username },
+                user: { id: userId, name: userName },
                 color,
             }
 
@@ -110,7 +103,7 @@ export const useSelectionState = ({
 
             return highlightId
         },
-        [userId, username, color, savedHighlights, channelRef]
+        [userId, userName, color, savedHighlights, channelRef]
     )
 
     const removeHighlight = useCallback(

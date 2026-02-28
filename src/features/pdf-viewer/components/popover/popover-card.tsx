@@ -1,20 +1,16 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useReferencesContext } from '@/features/references/providers/references-provider'
+import { usePdfViewerContext } from '../../providers/pdf-viewer-provider'
 import type { PopoverState } from './types'
-import type { HandleReferenceInChatFn } from '@/features/references/lib/types'
 
 type PopovercardProps = {
-    handleReferenceInChat: HandleReferenceInChatFn
     popover: PopoverState
-    setPopover: Dispatch<SetStateAction<PopoverState | null>>
     userName?: string
 }
 
-export function PopoverCard({
-    handleReferenceInChat,
-    popover,
-    setPopover,
-    userName,
-}: PopovercardProps) {
+export function PopoverCard({ popover, userName }: PopovercardProps) {
+    const { setPopover } = usePdfViewerContext()
+    const { handleReferenceInChat } = useReferencesContext()
+
     return (
         <div
             className="absolute z-50 transform -translate-x-1/2 -translate-y-full bg-slate-800 text-white px-4 py-2 rounded-lg shadow-xl flex flex-col items-center gap-1.5 select-none"

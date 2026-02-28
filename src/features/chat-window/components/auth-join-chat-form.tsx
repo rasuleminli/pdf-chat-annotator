@@ -1,12 +1,12 @@
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useAuthContext } from '@/features/auth/providers/auth-provider'
 import { supabase } from '@/lib/supabase'
 import { AlertCircleIcon, Loader2Icon } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useAuth } from '@/features/auth/hooks/use-auth'
 
 export function AuthJoinChatForm() {
-    const { loading: isUserLoading } = useAuth()
+    const { loading: isUserLoading } = useAuthContext()
 
     const [name, setName] = useState('')
     const isNameTooLong = name.trim().length > 30
@@ -20,7 +20,7 @@ export function AuthJoinChatForm() {
         if (isJoining || !isNameValid || isUserLoading) return
         setIsJoining(true)
         setJoinError(null)
-        const { data, error } = await supabase.auth.signInAnonymously({
+        const { error } = await supabase.auth.signInAnonymously({
             options: {
                 data: { display_name: name },
             },
@@ -32,7 +32,6 @@ export function AuthJoinChatForm() {
         }
         setIsJoining(false)
         setJoinError(null)
-        console.log(data)
     }
 
     return (

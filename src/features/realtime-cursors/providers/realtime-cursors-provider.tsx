@@ -1,20 +1,47 @@
+import { supabase } from '@/lib/supabase'
+import type {
+    HighlightPayload,
+    SelectionPayload,
+    SelectionRect,
+} from '@/lib/types'
 import {
     REALTIME_SUBSCRIBE_STATES,
-    RealtimeChannel,
+    type RealtimeChannel,
 } from '@supabase/supabase-js'
-import { useEffect, useRef, useState } from 'react'
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
+import { useCursorState } from '../hooks/states/use-cursor-state'
+import { useSelectionState } from '../hooks/states/use-selection-state'
+import { EVENTS, ROOM_NAME } from '../lib/constants'
+import type { CursorEventPayload } from '../lib/types'
+import { useAuthContext } from '@/features/auth/providers/auth-provider'
 
-import { supabase } from '@/lib/supabase'
-import { EVENTS } from './lib/constants'
-import {
-    useCursorState,
-    type CursorEventPayload,
-} from './states/use-cursor-state'
-import {
-    useSelectionState,
-    type HighlightPayload,
-    type SelectionPayload,
-} from './states/use-selection-state'
+type TRealtimeCursorsContext = {
+    cursors: Record<string, CursorEventPayload>
+    selections: Record<string, SelectionPayload>
+    savedHighlights: Record<string, HighlightPayload>
+    addHighlight: (rects: SelectionRect[], text: string) => string
+    removeHighlight: (highlightId: string) => void
+}
+
+const RealtimeCursorsContext = createContext<TRealtimeCursorsContext | null>(
+    null
+)
+
+export function useRealtimeCursorsContext() {
+    const ctx = useContext(RealtimeCursorsContext)
+    if (!ctx)
+        throw new Error(
+            'useRealtimeCursorsContext must be used within RealtimeCursorsProvider'
+        )
+    return ctx
+}
 
 /**
  * Helpers.
@@ -24,16 +51,17 @@ const generateRandomColor = () =>
 
 const generateRandomNumber = () => Math.floor(Math.random() * 100)
 
-/**
- * Main hook that handles both cursors and selections states.
- */
-export const useRealtimeCursors = ({
-    roomName,
-    username,
+export function RealtimeCursorsProvider({
+    children,
 }: {
-    roomName: string
-    username: string
-}) => {
+    children: React.ReactNode
+}) {
+    const { user } = useAuthContext()
+
+    // Because we never subscribe to a channel when there's no user,
+    // it shouldn't reach this fallback.
+    const userName = user?.name || 'Guest'
+
     const [color] = useState(generateRandomColor())
     const [userId] = useState(generateRandomNumber())
 
@@ -41,7 +69,7 @@ export const useRealtimeCursors = ({
 
     const { cursors, setCursors, cursorPayload } = useCursorState({
         userId,
-        username,
+        userName,
         color,
         channelRef,
     })
@@ -55,13 +83,15 @@ export const useRealtimeCursors = ({
         removeHighlight,
     } = useSelectionState({
         userId,
-        username,
+        userName,
         color,
         channelRef,
     })
 
     useEffect(() => {
-        const channel = supabase.channel(roomName)
+        if (!user) return
+
+        const channel = supabase.channel(ROOM_NAME)
 
         channel
             .on('presence', { event: 'join' }, () => {
@@ -188,13 +218,22 @@ export const useRealtimeCursors = ({
             channelRef.current = null
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [user])
 
-    return {
-        cursors,
-        selections,
-        savedHighlights,
-        addHighlight,
-        removeHighlight,
-    }
+    const value = useMemo(
+        () => ({
+            cursors,
+            selections,
+            savedHighlights,
+            addHighlight,
+            removeHighlight,
+        }),
+        [cursors, selections, savedHighlights, addHighlight, removeHighlight]
+    )
+
+    return (
+        <RealtimeCursorsContext.Provider value={value}>
+            {children}
+        </RealtimeCursorsContext.Provider>
+    )
 }

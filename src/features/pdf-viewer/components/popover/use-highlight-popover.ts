@@ -1,14 +1,10 @@
-import type { PopoverState } from '@/lib/types'
-import { useRef, type Dispatch, type SetStateAction } from 'react'
+import { useRef } from 'react'
+import { usePdfViewerContext } from '../../providers/pdf-viewer-provider'
 
 // The popover that appears when user selects text in the PDF viewer
-export const useHighlightPopover = ({
-    popover,
-    setPopover,
-}: {
-    popover: PopoverState | null
-    setPopover: Dispatch<SetStateAction<PopoverState | null>>
-}) => {
+export const useHighlightPopover = () => {
+    const { popover, setPopover } = usePdfViewerContext()
+
     const containerRef = useRef<HTMLDivElement>(null)
 
     const handleMouseUp = () => {
