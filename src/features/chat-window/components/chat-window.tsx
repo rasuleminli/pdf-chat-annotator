@@ -26,7 +26,7 @@ import {
 
 export function ChatWindow() {
     return (
-        <div className="border rounded-md overflow-hidden flex p-4 w-full h-[700px] relative">
+        <div className="border rounded-md overflow-hidden flex w-full h-[calc(100vh-2rem)] lg:col-span-7 sticky top-4">
             <ChatProvider>
                 <ChatWindowInner />
             </ChatProvider>
@@ -75,11 +75,11 @@ function ChatWindowInner() {
     }
 
     return (
-        <div className="flex flex-col w-full gap-4">
+        <div className="flex flex-col gap-4 bg-white w-full">
             <ChatMetadata />
 
             <Chat className="flex-1 w-full h-full">
-                <ChatMessages ref={messagesContainerRef}>
+                <ChatMessages ref={messagesContainerRef} className="p-4">
                     {messages.length > 0 ? (
                         messages.map(
                             ({
@@ -142,6 +142,7 @@ function ChatWindowInner() {
                         </p>
                     )}
                 </ChatMessages>
+
                 <ChatToolbar>
                     {/* We wrap the textarea into form so that we can submit the form
                     by clicking on the send button without repeating ourselves. */}

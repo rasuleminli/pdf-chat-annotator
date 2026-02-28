@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-import type { OnDocumentLoadSuccess } from 'react-pdf/src/shared/types.js'
 import { usePdfViewerContext } from '../providers/pdf-viewer-provider'
 import { PopoverCard } from './popover/popover-card'
 import { useHighlightPopover } from './popover/use-highlight-popover'
@@ -22,39 +21,43 @@ export function PdfViewer() {
     const { containerRef, handleMouseUp, handleMouseDown } =
         useHighlightPopover()
 
-    const [numPages, setNumPages] = useState<number>(0)
-    const onDocumentLoadSuccess: OnDocumentLoadSuccess = ({ numPages }) => {
-        setNumPages(numPages)
-    }
+    // Resize the rendered PDF to take the full width of the container
+    const [computedDocWidth, setComputedDocWidth] = useState<number>()
+    useEffect(() => {
+        if (!containerRef.current) return
+        const observer = new ResizeObserver(([entry]) => {
+            setComputedDocWidth(entry.contentRect.width)
+        })
+        observer.observe(containerRef.current)
+        return () => observer.disconnect()
+    }, [containerRef])
 
     return (
-        <div
-            ref={containerRef}
-            onMouseUp={handleMouseUp}
-            onMouseDown={handleMouseDown}
-            className="border rounded-md overflow-hidden shrink-0"
-        >
-            <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
-                <Page pageNumber={pageNumber} />
-            </Document>
+        <div className="flex flex-col lg:col-span-13">
+            <div
+                ref={containerRef}
+                onMouseUp={handleMouseUp}
+                onMouseDown={handleMouseDown}
+                className="border rounded-md overflow-hidden"
+            >
+                <Document file={file}>
+                    <Page width={computedDocWidth} pageNumber={pageNumber} />
+                </Document>
 
-            {popover && <PopoverCard popover={popover} />}
+                {popover && <PopoverCard popover={popover} />}
 
-            {clickedHighlight && (
-                <PopoverCard
-                    popover={{
-                        x: clickedHighlight.x,
-                        y: clickedHighlight.y,
-                        text: clickedHighlight.payload.text,
-                        rects: clickedHighlight.payload.rects,
-                    }}
-                    userName={clickedHighlight.payload.user.name}
-                />
-            )}
-
-            <p>
-                Page {pageNumber} of {numPages}
-            </p>
+                {clickedHighlight && (
+                    <PopoverCard
+                        popover={{
+                            x: clickedHighlight.x,
+                            y: clickedHighlight.y,
+                            text: clickedHighlight.payload.text,
+                            rects: clickedHighlight.payload.rects,
+                        }}
+                        userName={clickedHighlight.payload.user.name}
+                    />
+                )}
+            </div>
         </div>
     )
 }

@@ -6,7 +6,7 @@ import { Providers } from './providers'
 function App() {
     return (
         <Providers>
-            <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-start gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-20 w-full items-start gap-3 p-4">
                 <PdfViewer />
                 <ChatWindow />
                 <RealtimeCursors />

@@ -9,7 +9,7 @@ export function ChatMetadata() {
     if (!user) return null
 
     return (
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between p-4 w-full">
             <div className="flex flex-col items-start gap-1">
                 <p>
                     Joined chat as{' '}
