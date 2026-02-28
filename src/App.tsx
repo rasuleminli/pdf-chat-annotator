@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChatWindow } from './components/chat-window'
 import { PdfViewer } from './components/pdf-viewer'
 import { useAuth } from './features/auth/hooks/use-auth'
@@ -7,6 +7,7 @@ import { RealtimeCursors } from './features/realtime-cursors/components/realtime
 import { useRealtimeCursors } from './features/realtime-cursors/hooks/use-realtime-cursors'
 import { useReferences } from './features/references/hooks/use-references'
 import type { HighlightPayload } from './features/realtime-cursors/hooks/states/use-selection-state'
+import type { PopoverState } from './lib/types'
 
 const ROOM_NAME = 'pdf_room'
 
@@ -33,6 +34,8 @@ function App() {
         handleFocusHighlight,
     } = useReferences({ addHighlight, removeHighlight })
 
+    const [popover, setPopover] = useState<PopoverState | null>(null)
+
     // If the highlight is already created, show a popover on click
     const [clickedHighlight, setClickedHighlight] = useState<{
         payload: HighlightPayload
@@ -40,14 +43,25 @@ function App() {
         y: number
     } | null>(null)
 
-    const closeClickedHighlight = () => setClickedHighlight(null)
+    // Close popover and clear selection when user clicks anywhere else
+    useEffect(() => {
+        const handleMouseDown = () => {
+            setClickedHighlight(null)
+            setPopover(null)
+        }
+        document.addEventListener('mousedown', handleMouseDown)
+        return () => {
+            document.removeEventListener('mousedown', handleMouseDown)
+        }
+    }, [])
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full items-start gap-5">
             <PdfViewer
+                popover={popover}
+                setPopover={setPopover}
                 handleReferenceInChat={handleReferenceInChat}
                 clickedHighlight={clickedHighlight}
-                closeClickedHighlight={closeClickedHighlight}
             />
             <ChatWindow
                 pendingHighlightRef={pendingHighlightRef}
